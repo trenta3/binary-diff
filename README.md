@@ -42,3 +42,36 @@ compiti "a breve termine":
 
 Chiunque abbia delle idee in proposito è ben accetto.
 
+
+# Piani d'attacco
+
+## Algoritmo stupido
+
+Provo a descrivere in breve il primo algoritmo che mi è venuto in mente. Spero si riesca
+a comprendere.
+
+Ci teniamo due puntatori `pa` e `pb` che puntano a dove stiamo gestendo i file A e B. (All'
+inizio sono entrambi al byte iniziale, ovvero `0`). Adesso consideriamo il byte `B[pb]` e ci
+chiediamo se esista una stringa sufficientemente lunga di caratteri di A che coincida con
+una che inizia da `B[pb]` e continua per un po'. (Sufficientemente lunga si intende più di
+una lunghezza fissata attorno alla decina di byte).
+
+Se esiste allora scriviamo questa informazione nel file di patch (Basta inserire il byte
+di A in cui inizia ed il numero di byte di lunghezza) e muoviamo `pb` alla fine della
+corrispondente stringa in B, nel primo carattere che non viene compreso.
+Se non esiste allora aggiungiamo il byte `B[pb]` al buffer dei dati nuovi (quelli che non
+erano riconoscibili nel file A) e passiamo `pb` al byte successivo. La prima volta che
+verrà incontrato un byte esistente nel file A il buffer dei dati nuovi verrà svuotato e
+scritto nel file di patch nelle modalità indicate più sopra.
+
+Il modo più banale per controllare se una tale stringa esiste è semplicemente di controllare
+tutte le lettere di A e fermarsi sulla prima che coincide con `B[pb]`. Se le successive
+lettere coincidono allora espandiamo la stringa, altrimenti ci teniamo da parte un puntatore
+a questa e procediamo con il cercare la prossima. In questo modo troviamo la più grande
+stringa comune ad A ed al pezzo di B a partire dal byte `pb`.
+
+Ciò ci obbliga purtroppo a ripercorrere tutto il file A (in teoria) per quasi ogni byte di
+B (anche se ciò in casi reali non dovrebbe accadere). Molto probabilmente si può provare a
+pensare ad adattare questo algoritmo al metodo "divide et impera" sperando di guadagnarne
+qualcosa se si effettua la ricerca su meta di tutto il file A per volta per poi "unirle",
+un po' come viene fatto nel `merge sort`.
