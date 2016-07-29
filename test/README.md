@@ -18,3 +18,7 @@ Attualmente sono presenti i seguenti test (i numeri corrispondono):
 8. Mutazioni multiple in file di testo
 9. Inserzioni, Cancellazioni e Mutazioni multiple successive in file di testo
 10. File di testo completamente identici
+11. File before vuoto
+12. File after vuoto
+13. File before con un solo carattere
+14. File after con un solo carattere

@@ -1,0 +1,15 @@
+I am working on a simple application written in C. I am working in a Unix environment.
+
+My application is doing some simple I/O. I use printf to prompt the user for some input and then use scanf to get that input.
+
+The problem is, I don't know how to tell my application that I am ready to proceed after entering in a value. Typing 'enter' provides a newline '\n' which makes sense. Control-d does allow scanf to capture my input but seems to ignore any subsequent scanf instructions.
+
+Can someone help me out?
+
+printf("Enter name\n");
+scanf("%s",input);
+printf("%s",input);
+
+printf("enter more junk\n")
+scanf("%s",morestuff); /* cntrl+d skips this*/
+
