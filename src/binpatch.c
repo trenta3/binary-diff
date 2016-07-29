@@ -66,8 +66,28 @@ int main (int argc, char *argv[]) {
 	if (strncmp("001", &Dmap[5], 3) == 0) {
 		// La versione del file di patch è la prima, procediamo con la lettura
 		log_info("Riconosciuta versione 001 del file di patch");
-		// Adesso leggiamo il valore (ed il MSB) e decidiamo cosa fare.
-		// TODO
+		// Iniziamo da dopo l'header e procediamo processando tutto il file
+		ulint posD = 8;
+		for ( ; posD < Dsize; ) {
+			// Ogni volta leggiamo il valore (ed il MSB) e decidiamo cosa fare.
+			uint length;
+			memcpy(&length, &Dmap[posD], sizeof(ulint));
+			// Facciamo avanzare il puntatore della posizione, visto che ormai l'abbiamo letto
+			posD += sizeof(ulint);
+			if (length == (length | Tilde(Tilde0UL >> 1))) {
+				// Se rimane uguale quando setto il MSB allora avevo MSB=1
+				length &= Tilde0UL >> 1;
+				// Adesso quindi leggiamo tutto il pezzo di A corrispondente e lo sbattiamo in fileB
+				ulint ptpos;
+				memcpy(&ptpos, &Dmap[posD], sizeof(ulint));
+				check (fwrite(&Amap[ptpos], length, 1, fileB) != 1, "fwrite failed to fileB");
+				posD += sizeof(ulint);
+			} else {
+				// Altrimenti avevo MSB=0 e quindi pesco i dati grezzi direttamente dal diff
+				check (fwrite(&Dmap[posD], length, 1, fileB) != 1, "fwrite failed to fileB");
+				posD += length;
+			}
+		}
 	} else check (true, "unrecognized bdif version of patch file %s", argv[2]);
 
 	log_info("File chiusi. Programma terminato");
