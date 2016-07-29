@@ -22,6 +22,15 @@
 // Dichiariamo alcuni tipi che ci saranno comodi
 typedef unsigned long int ulint;
 
+void myclose(int status, void*arg) {
+	close((int) arg);
+}
+
+void myfclose(int status, void*arg) {
+	fclose((FILE*)arg);
+}
+
+
 // Uso: bindiff fileA fileB difffile
 int main (int argc, char *argv[]) {
 	FILE *difffile;
@@ -39,39 +48,35 @@ int main (int argc, char *argv[]) {
 	// Altrimenti apriamo i tre file controllando che non ci siano errori
 	fdA = open(argv[1], O_RDONLY);
 	checkexit (fdA < 0, "open %s RDONLY failed", argv[1]);
+	on_exit(myclose, (void*)fdA);
 
 	status = fstat(fdA, &Astat);
-	CHECK (status < 0, "stat %s failed", argv[1]);
-	ONERROR close(fdA); exit(EXIT_FAILURE); ENDCHECK
+	check (status < 0, "stat %s failed", argv[1]);
 
 	Asize = Astat.st_size;
 	Amap = mmap(0, Asize, PROT_READ, MAP_SHARED, fdA, 0);
-	CHECK (Amap == MAP_FAILED, "mmap %s failed", argv[1]);
-	ONERROR close(fdA); exit(EXIT_FAILURE); ENDCHECK
+	check (Amap == MAP_FAILED, "mmap %s failed", argv[1]);
 
 	fdB = open(argv[2], O_RDONLY);
-	CHECK (fdB < 0, "open %s RDONLY failed", argv[2]);
-	ONERROR close(fdA); exit(EXIT_FAILURE); ENDCHECK
+	check (fdB < 0, "open %s RDONLY failed", argv[2]);
+	on_exit(myclose, (void*)fdB);
 
 	status = fstat(fdB, &Bstat);
-	CHECK (status < 0, "stat %s failed", argv[2]);
-	ONERROR close(fdA); close(fdB); exit(EXIT_FAILURE); ENDCHECK
+	check (status < 0, "stat %s failed", argv[2]);
 
 	Bsize = Bstat.st_size;
 	Bmap = mmap(0, Bsize, PROT_READ, MAP_SHARED, fdB, 0);
-	CHECK (Bmap == MAP_FAILED, "mmap %s failed", argv[2]);
-	ONERROR close(fdA); close(fdB); exit(EXIT_FAILURE); ENDCHECK
+	check (Bmap == MAP_FAILED, "mmap %s failed", argv[2]);
 
 	difffile = fopen(argv[3], "wb");
-	CHECK (difffile == NULL, "Open %s RDWR failed", argv[3]);
-	ONERROR close(fdA); close(fdB); exit(EXIT_FAILURE); ENDCHECK
+	check (difffile == NULL, "Open %s RDWR failed", argv[3]);
+	on_exit(myfclose, (void*)difffile);
 
 	// --- FINE DEI CONTROLLI --- INIZIA IL CODICE VERO ---
 	log_info("File aperti. Inizio della ricerca differenze.");
 	// Scriviamo prima l'header nel file delle differenze
 	char header[] = "BDIFv001";
-	CHECK (fwrite(header, strlen(header), 1, difffile) != 1, "fwrite failed to difffile");
-	ONERROR fclose(difffile); close(fdA); close(fdB); exit(EXIT_FAILURE); ENDCHECK
+	check (fwrite(header, strlen(header), 1, difffile) != 1, "fwrite failed to difffile");
 	log_debug("Scritto header in difffile");
 
 	// firstBraw tiene traccia del primo carattere di B che non abbiamo sistemato in una stringa di A
@@ -101,18 +106,14 @@ int main (int argc, char *argv[]) {
 				// Ci sono dei raw byte da scrivere su file assolutamente
 				// Si scrive prima datalength con MSB settato a 0 e poi viene scritto il pezzo di dati grezzi di B
 				ulint datalength = (posB - firstBraw) & (~0UL >> 1);
-				CHECK (fwrite(&datalength, sizeof(ulint), 1, difffile) != 1, "fwrite failed in writing raw data with datalength = %d", datalength);
-				ONERROR fclose(difffile); close(fdA); close(fdB); exit(EXIT_FAILURE); ENDCHECK
-				CHECK (fwrite(&Bmap[firstBraw], datalength, 1, difffile) != 1, "fwrite failed in writing raw data from firstBraw = %d", firstBraw);
-				ONERROR fclose(difffile); close(fdA); close(fdB); exit(EXIT_FAILURE); ENDCHECK
+				check (fwrite(&datalength, sizeof(ulint), 1, difffile) != 1, "fwrite failed in writing raw data with datalength = %d", datalength);
+				check (fwrite(&Bmap[firstBraw], datalength, 1, difffile) != 1, "fwrite failed in writing raw data from firstBraw = %d", firstBraw);
 				log_debug("Writing raw data byte to difffile");
 			}
 			// Scriviamo gli estremi della posizione dei byte della stringa di A
 			ulint lengthofpiece = ptmatchlen | ~(~0UL >> 1);
-			CHECK (fwrite(&lengthofpiece, sizeof(ulint), 1, difffile) != 1, "fwrite failed in writing A-data with lengthofpiece = %d", lengthofpiece);
-			ONERROR fclose(difffile); close(fdA); close(fdB); exit(EXIT_FAILURE); ENDCHECK
-			CHECK (fwrite(&ptpos, sizeof(ulint), 1, difffile) != 1, "fwrite failed in writing A-data with ptpos = %d", ptpos);
-			ONERROR fclose(difffile); close(fdA); close(fdB); exit(EXIT_FAILURE); ENDCHECK
+			check (fwrite(&lengthofpiece, sizeof(ulint), 1, difffile) != 1, "fwrite failed in writing A-data with lengthofpiece = %d", lengthofpiece);
+			check (fwrite(&ptpos, sizeof(ulint), 1, difffile) != 1, "fwrite failed in writing A-data with ptpos = %d", ptpos);
 			log_debug("Writing compressed bytes to difffile");
 			// And then we set the new Bposition after the end of the found string
 			posB += ptmatchlen;
@@ -126,14 +127,11 @@ int main (int argc, char *argv[]) {
 	if (firstBraw != posB) {
 		// Abbiamo dei dati rimasti da scrivere su file
 		ulint datalength = (posB - firstBraw) & (~0UL >> 1);
-		CHECK (fwrite(&datalength, sizeof(ulint), 1, difffile) != 1, "fwrite failed in writing raw data with datalength = %d", datalength);
-		ONERROR fclose(difffile); close(fdA); close(fdB); exit(EXIT_FAILURE); ENDCHECK
-		CHECK (fwrite(&Bmap[firstBraw], datalength, 1, difffile) != 1, "fwrite failed in writing raw data from firstBraw = %d", firstBraw);
-		ONERROR fclose(difffile); close(fdA); close(fdB); exit(EXIT_FAILURE); ENDCHECK
+		check (fwrite(&datalength, sizeof(ulint), 1, difffile) != 1, "fwrite failed in writing raw data with datalength = %d", datalength);
+		check (fwrite(&Bmap[firstBraw], datalength, 1, difffile) != 1, "fwrite failed in writing raw data from firstBraw = %d", firstBraw);
 		log_debug("Writing last bytes to file");
 	}
 	// Dovrebbe essere terminato
-	fclose(difffile); close(fdA); close(fdB);
 	log_info("File chiusi. Programma terminato");
 	return 0;
 }

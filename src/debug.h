@@ -11,9 +11,18 @@
 #define log_warn(M, ...) fprintf(stderr, "[WARN] (%s:%d: errno: %s) " M "\n", __FILE__, __LINE__, clean_errno(), ##__VA_ARGS__)
 #define log_info(M, ...) fprintf(stderr, "[INFO] (%s:%d) " M "\n", __FILE__, __LINE__, ##__VA_ARGS__)
 #define log_debug(M, ...) fprintf(stderr, "[DEBUG] (%s:%d) " M "\n",__FILE__,__LINE__, ##__VA_ARGS__); sleep(1)
-#define check(A, M, ...) __label__ error; if (A) { log_err(M, ##__VA_ARGS__); errno=0; goto error; }
+#define check(A, M, ...) if (A) { log_err(M, ##__VA_ARGS__); errno=0; exit(EXIT_FAILURE); }
 #define CHECK(A, M, ...) { __label__ error, noerror; if (A) { log_err(M, ##__VA_ARGS__); errno=0; goto error; } else goto noerror; 
 #define ONERROR error: 
 #define ENDCHECK noerror: ; }
 #define checkexit(A, M, ...) if (A) { log_err(M, ##__VA_ARGS__); errno=0; exit(EXIT_FAILURE); }
+
+#ifdef NODEBUG
+#define log_debug(M, ...)
+#endif
+
+#ifdef NOINFO
+#define log_info(M, ...)
+#endif
+
 #endif
