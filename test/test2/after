@@ -1,0 +1,23 @@
+Yesterday Professor Pheno Menon took me and one of my friends to his house to demonstrate one of his most recent mathematical discoveries. When we got there, he showed us a rectangular table. He gave us a packet containing quite a few coins and said:
+
+"Friends, see that table over there? Last night I tried almost all possible configurations and came to my phenomenal conclusion: this table cannot be completely covered with 400400 coins like these."
+
+I was well aware of the phenomenal mistakes he often makes; besides, the tables seemed too small for such a bold statement. Seeing disbelief in my eyes, he went on:
+
+"Don't think it's true? OK, go ahead, here are your 400400 coins. These are all yours if you can cover this table with these."
+
+Now I closely noticed the coins. They were all identical and perfectly circular disks, with a very small thickness. So I immediately got to work. After half an hour of effort (while my friend and Professor were lazing on the couch); I came up with a configuration.
+
+"Look Professor, I kneaw you were wrong," I said, "I didn't even need all the coins. I have arranged 100100 coins on the table such that none of them overlap, and it's impossible to put another coin without causing overlap."
+
+"No no, my boy, you've got me wrong." he replied. "You need to cover the table entirely; there must not be gaps. Every point on the table must lie below some coin. Your coins may, however, overlap."
+
+My friend finally spoke out, "Then, Professor, you're certainly wrong."
+
+How did my friend know?
+
+Notes:
+
+For a coin to lie on the table, its center must lie on the table.
+This is not lateral thinking; you must supply a valid mathematical proof that 400400 coins are enough to cover the table using the given information.
+This was recently posted (with a different wording) on another online forum by a user who claimed to have heard this from his friend. The exact source is unknown to me.
