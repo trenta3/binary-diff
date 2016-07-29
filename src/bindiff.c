@@ -33,14 +33,14 @@ int main (int argc, char *argv[]) {
 	const char *Amap, *Bmap;
 
 	// Stampiamo il numero di versione
-	printf("***bindiff v. 001***\n");
+	printf("*** bindiff v. 001 - A minimal binary diff ***\n");
 
 	// Vediamo se ci hanno passato il numero giusto di argomenti
-	checkexit (argc < 4, "Vanno passati almeno tre argomenti.\nUso: bindiff fileA fileB difffile\nProduce un file delle differenze tra A e B.\n");
+	check (argc < 4, "\nVanno passati almeno tre argomenti.\nUso: bindiff fileA fileB difffile\nProduce un file delle differenze tra A e B.");
 
-	// Altrimenti apriamo i tre file controllando che non ci siano errori
+	// Apriamo i tre file controllando che non ci siano errori
 	fdA = open(argv[1], O_RDONLY);
-	checkexit (fdA < 0, "open %s RDONLY failed", argv[1]);
+	check (fdA < 0, "open %s RDONLY failed", argv[1]);
 	on_exit(lambda (void, (int s __attribute__ ((unused)), void* arg), { close((int)(intptr_t)arg); }), (void*)(intptr_t)fdA);
 
 	status = fstat(fdA, &Astat);

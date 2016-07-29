@@ -1,5 +1,5 @@
-#ifndef __dbg_h__
-#define __dbg_h__
+#ifndef __debug_h__
+#define __debug_h__
 
 #include <stdio.h>
 #include <errno.h>
@@ -23,7 +23,6 @@
 #define CHECK(A, M, ...) { __label__ error, noerror; if (A) { log_err(M, ##__VA_ARGS__); errno=0; goto error; } else goto noerror; 
 #define ONERROR error: 
 #define ENDCHECK noerror: ; }
-#define checkexit(A, M, ...) if (A) { log_err(M, ##__VA_ARGS__); errno=0; exit(EXIT_FAILURE); }
 
 #ifdef NODEBUG
 #define log_debug(M, ...)
