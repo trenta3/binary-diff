@@ -1,12 +1,14 @@
-#include <stdio.h>
-#include <string.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <errno.h>
+
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 #include "debug.h"
 
 // Dichiariamo il fattore di qualità (quanti byte devono essere ripetuti affinchè
@@ -21,15 +23,6 @@
 
 // Dichiariamo alcuni tipi che ci saranno comodi
 typedef unsigned long int ulint;
-
-void myclose(int status, void*arg) {
-	close((int) arg);
-}
-
-void myfclose(int status, void*arg) {
-	fclose((FILE*)arg);
-}
-
 
 // Uso: bindiff fileA fileB difffile
 int main (int argc, char *argv[]) {
@@ -48,29 +41,29 @@ int main (int argc, char *argv[]) {
 	// Altrimenti apriamo i tre file controllando che non ci siano errori
 	fdA = open(argv[1], O_RDONLY);
 	checkexit (fdA < 0, "open %s RDONLY failed", argv[1]);
-	on_exit(myclose, (void*)fdA);
+	on_exit(lambda (void, (int s __attribute__ ((unused)), void* arg), { close((int)(intptr_t)arg); }), (void*)(intptr_t)fdA);
 
 	status = fstat(fdA, &Astat);
 	check (status < 0, "stat %s failed", argv[1]);
 
-	Asize = Astat.st_size;
+	Asize = (size_t) Astat.st_size;
 	Amap = mmap(0, Asize, PROT_READ, MAP_SHARED, fdA, 0);
 	check (Amap == MAP_FAILED, "mmap %s failed", argv[1]);
 
 	fdB = open(argv[2], O_RDONLY);
 	check (fdB < 0, "open %s RDONLY failed", argv[2]);
-	on_exit(myclose, (void*)fdB);
+	on_exit(lambda (void, (int s __attribute__ ((unused)), void* arg), { close((int)(intptr_t)arg); }), (void*)(intptr_t)fdB);
 
 	status = fstat(fdB, &Bstat);
 	check (status < 0, "stat %s failed", argv[2]);
 
-	Bsize = Bstat.st_size;
+	Bsize = (size_t) Bstat.st_size;
 	Bmap = mmap(0, Bsize, PROT_READ, MAP_SHARED, fdB, 0);
 	check (Bmap == MAP_FAILED, "mmap %s failed", argv[2]);
 
 	difffile = fopen(argv[3], "wb");
 	check (difffile == NULL, "Open %s RDWR failed", argv[3]);
-	on_exit(myfclose, (void*)difffile);
+	on_exit(lambda (void, (int s __attribute__ ((unused)), void* arg), { fclose((FILE*)arg); }), (void*)difffile);
 
 	// --- FINE DEI CONTROLLI --- INIZIA IL CODICE VERO ---
 	log_info("File aperti. Inizio della ricerca differenze.");
@@ -100,20 +93,20 @@ int main (int argc, char *argv[]) {
 		// A questo punto in ptpos e ptmatchlen abbiamo la più grossa stringa in A che coincide
 		// con gli elementi di B in questo punto. Se è maggiore o uguale di MIN_VALID_BYTES
 		// allora la scriviamo in difffile, premurandoci di salvare i byte che sono raw
-		log_debug("End of searching best string match for byte number %ld", posB);
+		log_debug("End of searching best string match for byte number %lu", posB);
 		if (ptmatchlen >= MIN_VALID_BYTES) {
 			if (firstBraw != posB) {
 				// Ci sono dei raw byte da scrivere su file assolutamente
 				// Si scrive prima datalength con MSB settato a 0 e poi viene scritto il pezzo di dati grezzi di B
 				ulint datalength = (posB - firstBraw) & (~0UL >> 1);
-				check (fwrite(&datalength, sizeof(ulint), 1, difffile) != 1, "fwrite failed in writing raw data with datalength = %d", datalength);
-				check (fwrite(&Bmap[firstBraw], datalength, 1, difffile) != 1, "fwrite failed in writing raw data from firstBraw = %d", firstBraw);
+				check (fwrite(&datalength, sizeof(ulint), 1, difffile) != 1, "fwrite failed in writing raw data with datalength = %lu", datalength);
+				check (fwrite(&Bmap[firstBraw], datalength, 1, difffile) != 1, "fwrite failed in writing raw data from firstBraw = %lu", firstBraw);
 				log_debug("Writing raw data byte to difffile");
 			}
 			// Scriviamo gli estremi della posizione dei byte della stringa di A
 			ulint lengthofpiece = ptmatchlen | ~(~0UL >> 1);
-			check (fwrite(&lengthofpiece, sizeof(ulint), 1, difffile) != 1, "fwrite failed in writing A-data with lengthofpiece = %d", lengthofpiece);
-			check (fwrite(&ptpos, sizeof(ulint), 1, difffile) != 1, "fwrite failed in writing A-data with ptpos = %d", ptpos);
+			check (fwrite(&lengthofpiece, sizeof(ulint), 1, difffile) != 1, "fwrite failed in writing A-data with lengthofpiece = %lu", lengthofpiece);
+			check (fwrite(&ptpos, sizeof(ulint), 1, difffile) != 1, "fwrite failed in writing A-data with ptpos = %lu", ptpos);
 			log_debug("Writing compressed bytes to difffile");
 			// And then we set the new Bposition after the end of the found string
 			posB += ptmatchlen;
@@ -127,8 +120,8 @@ int main (int argc, char *argv[]) {
 	if (firstBraw != posB) {
 		// Abbiamo dei dati rimasti da scrivere su file
 		ulint datalength = (posB - firstBraw) & (~0UL >> 1);
-		check (fwrite(&datalength, sizeof(ulint), 1, difffile) != 1, "fwrite failed in writing raw data with datalength = %d", datalength);
-		check (fwrite(&Bmap[firstBraw], datalength, 1, difffile) != 1, "fwrite failed in writing raw data from firstBraw = %d", firstBraw);
+		check (fwrite(&datalength, sizeof(ulint), 1, difffile) != 1, "fwrite failed in writing raw data with datalength = %lu", datalength);
+		check (fwrite(&Bmap[firstBraw], datalength, 1, difffile) != 1, "fwrite failed in writing raw data from firstBraw = %lu", firstBraw);
 		log_debug("Writing last bytes to file");
 	}
 	// Dovrebbe essere terminato

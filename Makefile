@@ -4,7 +4,7 @@ all: compile
 
 compile:
 	mkdir -p bin
-	gcc src/bindiff.c -o bin/bindiff
+	gcc src/bindiff.c -o bin/bindiff -Wall -Wextra -Wsign-conversion
 
 clean:
 	rm -rf bin

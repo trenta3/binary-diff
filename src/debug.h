@@ -6,6 +6,14 @@
 #include <string.h>
 #include <unistd.h>
 
+#define lambda(l_ret_type, l_arguments, l_body)       \
+({                                                    \
+    l_ret_type l_anonymous_functions_name l_arguments \
+    l_body                                            \
+    &l_anonymous_functions_name;                      \
+})
+
+
 #define clean_errno() (errno == 0 ? "None" : strerror(errno))
 #define log_err(M, ...) fprintf(stderr, "[ERROR] (%s:%d: errno: %s) " M "\n", __FILE__, __LINE__, clean_errno(), ##__VA_ARGS__)
 #define log_warn(M, ...) fprintf(stderr, "[WARN] (%s:%d: errno: %s) " M "\n", __FILE__, __LINE__, clean_errno(), ##__VA_ARGS__)
