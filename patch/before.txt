@@ -1,0 +1,9 @@
+When a suffix L or UL is not used, the compiler uses the first type that can contain the constant from a list 
+(see details in C99 standard, clause 6.4.4:5. For a decimal constant, the list is int, long int, long long int).
+
+As a consequence, most of the times, it is not necessary to use the suffix. It does not change the meaning of the program. 
+It does not change the meaning of your example initialization of x for most architectures, although it would if you had 
+chosen a number that could not be represented as a long long. See also codebauer's answer for an example where the U part 
+of the suffix is necessary.
+
+

@@ -1,0 +1,35 @@
+--------DISPATCH--------
+
+**GENERALI**
+
+Il dispatch.cpp riceve tre argomenti in argv da linea di comando; in ordine, sono
+
+1. patch
+2. data
+3. result
+
+Il patch è il file di istruzioni generato per recuperare B da A;
+Il data è il file A;
+Il result è il file dove si vuol scrivere il B recuperato in base alle istruzioni.
+
+**FORMATI**
+
+Il result viene sovrascritto e il data va fornito così com'è.
+Per quanto riguarda il patch, deve avere il seguente formato: ogni riga può essere fatta in due modi:
+
+MODO 1 (recover):
+
+*1 ADDR LEN\n
+
+L'asterisco indica che è una riga istruzioni. L'1 serve per indicare che è una riga *recover*.
+ADDR dice da quale carattere iniziare a leggere il file A e LEN per quanto. \n serve per il parsing.
+
+MODO 2 (newdata):
+
+*0 LEN\n
+DATA\n
+
+L'asterisco indica che è una riga istruzioni. L'1 serve per indicare che è una riga *newdata*. LEN dice quanto è lungo il nuovo pezzo. 
+Dopo un a capo c'è DATA, il nuovo contenuto. Un altro a capo.
+
+NOTA BENE: è fondamentale che ci sia un solo spazio tra 1 e ADDR, ADDR e LEN, 0 e LEN, altrimenti ciaone.
