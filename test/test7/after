@@ -1,0 +1,65 @@
+Introduction
+
+iven an ASCII tower and the force of the wind, write a program or function to determine if the tower will balance or which way it will fall.
+
+For example the first tower balances but the second falls over toward the left.
+
+  # #            # #
+  ###            ### 
+ ###            ### 
+ # #            # # 
+#####          ##### 
+ ###            ### 
+ ###              #
+This is my first challenge. I hope you enjoy it.
+
+Directions
+
+The tower consists of connected blocks represented by # and forms a rigid object. Each block is a square with a width and height of one unit and has a constant density. There are two forces that act on the tower, its weight and the wind force. All forces act on each block individually and pass through the center of the block.
+
+Due to its weight, each block has a downward force of one unit acting on it.
+Also, each block that does not have another block adjacent to it on its windward side has a force on it acting horizontally in the direction of the wind. The magnitude of this force is given as an input.
+The direction of the wind is indicated by an ASCII flag somewhere in the input. There will be a flag in the input if and only if the wind is not zero. The flag does not affect any forces.
+The flag will look exactly as it appears below.
+
+Flag design and corresponding wind direction:
+
+ o~~        ~~o
+ |~~        ~~|
+
+--->        <---
+To clarify, the tobject and will not break apart and is not attached to the ground. However, your program should calculate the forces for each block individually to determine whether the tower balances.
+
+Example
+
+  o~~
+  |~~
+  # #              > > 
+  ###              >## 
+ ###              >##  
+ # #              > >  
+#####            >#### 
+ ###              >##  
+ ###              >##  
+
+Wind force: 1    Wind direction: ---
+The wind is blowing right and will push on the blocks shown with a > on the above right. Note that the wind acts on the inside of holes.
+
+Assume the lower left corner of the tower has coordinates (0,0). The moment around the left base of the tower at (0,0) is 71 units clockwise so the tower will not fall left. The moment around the right base of the tower at (0,3) is 8 units clockwise so the tower will fall right.
+
+If the wind was blowing toward the let, the respective moments would be 2 units clockwise and 61 units counterclockwise at the same points, so the tower would balance.
+
+Input
+
+Your program or function must take two inputs, a decimal number and a newline-separated string.
+The decimal number will be greater thn zero and represents the force exerted by the wind on each exposed block as in the example.
+The string will represent the tower from top to bottom and may contain spaces, #|o~ characters, and newlines. You may optionally assume a trailing newline and/or pad the tower with trailing spaces to form a rectangle.
+The tower will have at least one # on the bottom row.
+You may input the number and string in either order.
+If the magnitude of the wind force is non-zero, thee will be a flag somewhere in the input, either on the ground or connected to the tower. The flag will have the exact form shown above.
+The # blocks will form a connected shape that may contain holes. In other words, all blocks will be adjacent to another other block unless there is only one block.
+Output
+
+One of the characters B, L, or R, depending on wheter the tower will balance, fall towards the left (counterclockwise), or fall towards the right (clockwise).
+The output may have an optional trailing newline.
+This is code-golf; standard rules and loopholes app

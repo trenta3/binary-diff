@@ -1,0 +1,7 @@
+When I start a graphical application from a terminal running bash, that application is somehow connected to that bash session. For example, when the applications dumps some text it will appear in the bash session it is started from. Also, some applications will get closed when i close the terminal using the close button, but not when i close the terminal by exiting the bash session using the exit command or CTRL+D.
+
+How is a graphical application started from a bash session connected to that bash session?
+
+bonus question: How can I inspect this connection? probably also manipulate?
+
+
