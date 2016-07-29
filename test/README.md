@@ -17,3 +17,4 @@ Attualmente sono presenti i seguenti test (i numeri corrispondono):
 7. Cancellazioni multiple in file di testo
 8. Mutazioni multiple in file di testo
 9. Inserzioni, Cancellazioni e Mutazioni multiple successive in file di testo
+10. File di testo completamente identici
