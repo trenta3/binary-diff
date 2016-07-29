@@ -40,7 +40,7 @@ int main (int argc, char *argv[]) {
 	check (status < 0, "stat %s failed", argv[1]);
 
 	Asize = (size_t) Astat.st_size;
-	Amap = mmap(0, Asize, PROT_READ, MAP_SHARED, fdA, 0);
+	Amap = mmap(0, Asize ? Asize : 1, PROT_READ, MAP_SHARED, fdA, 0);
 	check (Amap == MAP_FAILED, "mmap %s failed", argv[1]);
 
 	fdD = open(argv[2], O_RDONLY);

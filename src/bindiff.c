@@ -47,7 +47,7 @@ int main (int argc, char *argv[]) {
 	check (status < 0, "stat %s failed", argv[1]);
 
 	Asize = (size_t) Astat.st_size;
-	Amap = mmap(0, Asize, PROT_READ, MAP_SHARED, fdA, 0);
+	Amap = mmap(0, Asize ? Asize : 1, PROT_READ, MAP_SHARED, fdA, 0);
 	check (Amap == MAP_FAILED, "mmap %s failed", argv[1]);
 
 	fdB = open(argv[2], O_RDONLY);
@@ -58,7 +58,7 @@ int main (int argc, char *argv[]) {
 	check (status < 0, "stat %s failed", argv[2]);
 
 	Bsize = (size_t) Bstat.st_size;
-	Bmap = mmap(0, Bsize, PROT_READ, MAP_SHARED, fdB, 0);
+	Bmap = mmap(0, Bsize ? Bsize : 1, PROT_READ, MAP_SHARED, fdB, 0);
 	check (Bmap == MAP_FAILED, "mmap %s failed", argv[2]);
 
 	difffile = fopen(argv[3], "wb");

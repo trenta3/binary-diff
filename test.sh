@@ -15,7 +15,7 @@ for folder in test/test*; do
 	if [ "" == "$(cmp -l $folder/after tmp/$folder.new)" ]; then
 		echo "TEST PASSED";
 	else
-		echo "TEST FAILED";
+		echo "TEST FAILED: $folder";
 		exit 1;
 	fi
 done
