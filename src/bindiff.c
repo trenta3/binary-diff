@@ -66,7 +66,7 @@ int main (int argc, char *argv[]) {
 	on_exit(lambda (void, (int s __attribute__ ((unused)), void* arg), { fclose((FILE*)arg); }), (void*)difffile);
 
 	// --- FINE DEI CONTROLLI --- INIZIA IL CODICE VERO ---
-	log_info("File aperti. Inizio della ricerca differenze.");
+	log_debug("File aperti. Inizio della ricerca differenze.");
 	// Scriviamo prima l'header nel file delle differenze
 	char header[] = "BDIFv001";
 	check (fwrite(header, strlen(header), 1, difffile) != 1, "fwrite failed to difffile");
@@ -93,7 +93,7 @@ int main (int argc, char *argv[]) {
 		// A questo punto in ptpos e ptmatchlen abbiamo la più grossa stringa in A che coincide
 		// con gli elementi di B in questo punto. Se è maggiore o uguale di MIN_VALID_BYTES
 		// allora la scriviamo in difffile, premurandoci di salvare i byte che sono raw
-		log_debug("End of searching best string match for byte number %lu", posB);
+		log_debug("End of searching best string match for byte number %lu. Best match = %lu", posB, ptmatchlen);
 		if (ptmatchlen >= MIN_VALID_BYTES) {
 			if (firstBraw != posB) {
 				// Ci sono dei raw byte da scrivere su file assolutamente
@@ -101,13 +101,13 @@ int main (int argc, char *argv[]) {
 				ulint datalength = (posB - firstBraw) & (~0UL >> 1);
 				check (fwrite(&datalength, sizeof(ulint), 1, difffile) != 1, "fwrite failed in writing raw data with datalength = %lu", datalength);
 				check (fwrite(&Bmap[firstBraw], datalength, 1, difffile) != 1, "fwrite failed in writing raw data from firstBraw = %lu", firstBraw);
-				log_debug("Writing raw data byte to difffile");
+				log_debug("Writing raw data byte to difffile (length = %lu)", datalength);
 			}
 			// Scriviamo gli estremi della posizione dei byte della stringa di A
 			ulint lengthofpiece = ptmatchlen | ~(~0UL >> 1);
 			check (fwrite(&lengthofpiece, sizeof(ulint), 1, difffile) != 1, "fwrite failed in writing A-data with lengthofpiece = %lu", lengthofpiece);
 			check (fwrite(&ptpos, sizeof(ulint), 1, difffile) != 1, "fwrite failed in writing A-data with ptpos = %lu", ptpos);
-			log_debug("Writing compressed bytes to difffile");
+			log_debug("Writing compressed bytes to difffile (length = %lu)", lengthofpiece);
 			// And then we set the new Bposition after the end of the found string
 			posB += ptmatchlen;
 			firstBraw = posB;
@@ -122,9 +122,9 @@ int main (int argc, char *argv[]) {
 		ulint datalength = (posB - firstBraw) & (~0UL >> 1);
 		check (fwrite(&datalength, sizeof(ulint), 1, difffile) != 1, "fwrite failed in writing raw data with datalength = %lu", datalength);
 		check (fwrite(&Bmap[firstBraw], datalength, 1, difffile) != 1, "fwrite failed in writing raw data from firstBraw = %lu", firstBraw);
-		log_debug("Writing last bytes to file");
+		log_debug("Writing last bytes to difffile (length = %lu)", datalength);
 	}
 	// Dovrebbe essere terminato
-	log_info("File chiusi. Programma terminato");
+	log_debug("File chiusi. Programma terminato");
 	return 0;
 }

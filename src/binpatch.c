@@ -56,40 +56,42 @@ int main (int argc, char *argv[]) {
 
 	fileB = fopen(argv[3], "wb");
 	check (fileB == NULL, "fopen %s failed", argv[3]);
-	on_exit(lambda (void, (int s __attribute__ ((unused)), void* arg), { fclose((int)(intptr_t)arg); }), (void*)(intptr_t)fileB);
+	on_exit(lambda (void, (int s __attribute__ ((unused)), void* arg), { fclose((FILE*)arg); }), (void*)(intptr_t)fileB);
 
 	// --- FINE DEI CONTROLLI --- INIZIA IL CODICE VERO ---
-	log_info("File aperti. Inizio della applicazione patch.");
+	log_debug("File aperti. Inizio della applicazione patch.");
 	// Controlliamo la versione del file di patch (con che cosa inizia)
 	check (strncmp("BDIFv", Dmap, 5) != 0, "file %s is not a bdif patch file", argv[2]);
 
 	if (strncmp("001", &Dmap[5], 3) == 0) {
 		// La versione del file di patch è la prima, procediamo con la lettura
-		log_info("Riconosciuta versione 001 del file di patch");
+		log_debug("Riconosciuta versione 001 del file di patch");
 		// Iniziamo da dopo l'header e procediamo processando tutto il file
 		ulint posD = 8;
 		for ( ; posD < Dsize; ) {
 			// Ogni volta leggiamo il valore (ed il MSB) e decidiamo cosa fare.
-			uint length;
+			ulint length;
 			memcpy(&length, &Dmap[posD], sizeof(ulint));
 			// Facciamo avanzare il puntatore della posizione, visto che ormai l'abbiamo letto
 			posD += sizeof(ulint);
-			if (length == (length | Tilde(Tilde0UL >> 1))) {
+			if (length == (length | ~(~0UL >> 1))) {
 				// Se rimane uguale quando setto il MSB allora avevo MSB=1
-				length &= Tilde0UL >> 1;
+				length &= (~0UL >> 1);
 				// Adesso quindi leggiamo tutto il pezzo di A corrispondente e lo sbattiamo in fileB
 				ulint ptpos;
 				memcpy(&ptpos, &Dmap[posD], sizeof(ulint));
+				log_debug("Riconosciuto MSB=1 con lenghtofpiece = %lu e ptpos = %lu", length, ptpos);
 				check (fwrite(&Amap[ptpos], length, 1, fileB) != 1, "fwrite failed to fileB");
 				posD += sizeof(ulint);
 			} else {
 				// Altrimenti avevo MSB=0 e quindi pesco i dati grezzi direttamente dal diff
+				log_debug("Riconosciuto MSB=0 con datalength = %lu", length);
 				check (fwrite(&Dmap[posD], length, 1, fileB) != 1, "fwrite failed to fileB");
 				posD += length;
 			}
 		}
 	} else check (true, "unrecognized bdif version of patch file %s", argv[2]);
 
-	log_info("File chiusi. Programma terminato");
+	log_debug("File chiusi. Programma terminato");
 	return 0;
 }
