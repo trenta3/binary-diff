@@ -6,7 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#define NODEBUG
+//#define NODEBUG
 
 #define lambda(l_ret_type, l_arguments, l_body)       \
 ({                                                    \

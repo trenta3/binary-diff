@@ -81,7 +81,7 @@ int main (int argc, char *argv[]) {
 			// Calcoliamo il numero di posizioni di matching tra B[posB, ...] e A[posA, ...]
 			ulint awrk = curpos, bwrk = posB;
 			curmatchlen = 0;
-			while (awrk < Asize && bwrk < Bsize && Amap[awrk] == Bmap[bwrk]) { awrk++; bwrk++; curmatchlen++; }
+			while (awrk < Asize && bwrk < Bsize && Amap[awrk++] == Bmap[bwrk++]) { curmatchlen++; }
 			// Ora se è maggiore dell'ultima calcolata ce lo sostituiamo
 			if (curmatchlen > ptmatchlen) {
 				ptmatchlen = curmatchlen;
