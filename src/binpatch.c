@@ -25,11 +25,8 @@ int main (int argc, char *argv[]) {
 	struct stat Astat, Dstat;
 	const char *Amap, *Dmap;
 
-	// Stampiamo il numero di versione
-	printf("*** binpatch v. 001 - A minimal binary patcher ***\n");
-
 	// Vediamo se ci hanno passato il numero giusto di argomenti
-	check (argc < 4, "\nVanno passati almeno tre argomenti.\nUso: binpatch fileA difffile fileB\nDato il file delle differenze tra A e B produce B.");
+	check (argc < 4, "\nbinpatch v. 001\nVanno passati almeno tre argomenti.\nUso: binpatch fileA difffile fileB\nDato il file delle differenze tra A e B produce B.");
 
 	// Apriamo i tre file controllando che non ci siano errori
 	fdA = open(argv[1], O_RDONLY);
@@ -42,6 +39,7 @@ int main (int argc, char *argv[]) {
 	Asize = (size_t) Astat.st_size;
 	Amap = mmap(0, Asize ? Asize : 1, PROT_READ, MAP_SHARED, fdA, 0);
 	check (Amap == MAP_FAILED, "mmap %s failed", argv[1]);
+	check (madvise((void*)Amap, 0, MADV_SEQUENTIAL) < 0, "madvise %s failed", argv[1]);
 
 	fdD = open(argv[2], O_RDONLY);
 	check (fdD < 0, "open %s RDONLY failed", argv[2]);
@@ -53,6 +51,7 @@ int main (int argc, char *argv[]) {
 	Dsize = (size_t) Dstat.st_size;
 	Dmap = mmap(0, Dsize, PROT_READ, MAP_SHARED, fdD, 0);
 	check (Dmap == MAP_FAILED, "mmap %s failed", argv[2]);
+	check (madvise((void*)Dmap, 0, MADV_SEQUENTIAL) < 0, "madvise %s failed", argv[2]);
 
 	fileB = fopen(argv[3], "wb");
 	check (fileB == NULL, "fopen %s failed", argv[3]);

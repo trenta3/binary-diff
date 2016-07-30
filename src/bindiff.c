@@ -32,11 +32,8 @@ int main (int argc, char *argv[]) {
 	struct stat Astat, Bstat;
 	const char *Amap, *Bmap;
 
-	// Stampiamo il numero di versione
-	printf("*** bindiff v. 001 - A minimal binary diff ***\n");
-
 	// Vediamo se ci hanno passato il numero giusto di argomenti
-	check (argc < 4, "\nVanno passati almeno tre argomenti.\nUso: bindiff fileA fileB difffile\nProduce un file delle differenze tra A e B.");
+	check (argc < 4, "\nbindiff v. 001\nVanno passati almeno tre argomenti.\nUso: bindiff fileA fileB difffile\nProduce un file delle differenze tra A e B.");
 
 	// Apriamo i tre file controllando che non ci siano errori
 	fdA = open(argv[1], O_RDONLY);
@@ -49,6 +46,7 @@ int main (int argc, char *argv[]) {
 	Asize = (size_t) Astat.st_size;
 	Amap = mmap(0, Asize ? Asize : 1, PROT_READ, MAP_SHARED, fdA, 0);
 	check (Amap == MAP_FAILED, "mmap %s failed", argv[1]);
+	check (madvise((void*)Amap, 0, MADV_SEQUENTIAL) < 0, "madvise %s failed", argv[1]);
 
 	fdB = open(argv[2], O_RDONLY);
 	check (fdB < 0, "open %s RDONLY failed", argv[2]);
@@ -60,9 +58,10 @@ int main (int argc, char *argv[]) {
 	Bsize = (size_t) Bstat.st_size;
 	Bmap = mmap(0, Bsize ? Bsize : 1, PROT_READ, MAP_SHARED, fdB, 0);
 	check (Bmap == MAP_FAILED, "mmap %s failed", argv[2]);
+	check (madvise((void*)Amap, 0, MADV_SEQUENTIAL) < 0, "madvise %s failed", argv[2]);
 
 	difffile = fopen(argv[3], "wb");
-	check (difffile == NULL, "Open %s RDWR failed", argv[3]);
+	check (difffile == NULL, "fopen %s wb failed", argv[3]);
 	on_exit(lambda (void, (int s __attribute__ ((unused)), void* arg), { fclose((FILE*)arg); }), (void*)difffile);
 
 	// --- FINE DEI CONTROLLI --- INIZIA IL CODICE VERO ---

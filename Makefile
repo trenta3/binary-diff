@@ -7,8 +7,8 @@ all: compile test
 
 compile:
 	mkdir -p bin
-	gcc src/bindiff.c -o bin/bindiff -Wall -Wextra -Wsign-conversion
-	gcc src/binpatch.c -o bin/binpatch -Wall -Wextra -Wsign-conversion
+	gcc src/bindiff.c -O3 -o bin/bindiff -Wall -Wextra -Wsign-conversion
+	gcc src/binpatch.c -O3 -o bin/binpatch -Wall -Wextra -Wsign-conversion
 
 test:
 	./test.sh
