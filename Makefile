@@ -5,6 +5,8 @@ SHELL:=/bin/bash
 
 all: compile test
 
+# Da aggiungere -std=c99 -pedantic -Werror
+
 compile:
 	mkdir -p bin
 	gcc src/bindiff.c -O3 -o bin/bindiff -Wall -Wextra -Wsign-conversion

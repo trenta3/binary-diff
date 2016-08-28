@@ -21,6 +21,14 @@
 #define false 0
 #define true 1
 
+void fn_close (int s __attribute__ ((unused)), void* arg) {
+	close((int)(intptr_t)arg);
+}
+
+void fn_fclose (int s __attribute__ ((unused)), void* arg) {
+	fclose((FILE*)arg);
+}
+
 // Dichiariamo alcuni tipi che ci saranno comodi
 typedef unsigned long int ulint;
 
@@ -38,7 +46,7 @@ int main (int argc, char *argv[]) {
 	// Apriamo i tre file controllando che non ci siano errori
 	fdA = open(argv[1], O_RDONLY);
 	check (fdA < 0, "open %s RDONLY failed", argv[1]);
-	on_exit(lambda (void, (int s __attribute__ ((unused)), void* arg), { close((int)(intptr_t)arg); }), (void*)(intptr_t)fdA);
+	on_exit(fn_close, (void*)(intptr_t)fdA);
 
 	status = fstat(fdA, &Astat);
 	check (status < 0, "stat %s failed", argv[1]);
@@ -50,7 +58,7 @@ int main (int argc, char *argv[]) {
 
 	fdB = open(argv[2], O_RDONLY);
 	check (fdB < 0, "open %s RDONLY failed", argv[2]);
-	on_exit(lambda (void, (int s __attribute__ ((unused)), void* arg), { close((int)(intptr_t)arg); }), (void*)(intptr_t)fdB);
+	on_exit(fn_close, (void*)(intptr_t)fdB);
 
 	status = fstat(fdB, &Bstat);
 	check (status < 0, "stat %s failed", argv[2]);
@@ -62,7 +70,7 @@ int main (int argc, char *argv[]) {
 
 	difffile = fopen(argv[3], "wb");
 	check (difffile == NULL, "fopen %s wb failed", argv[3]);
-	on_exit(lambda (void, (int s __attribute__ ((unused)), void* arg), { fclose((FILE*)arg); }), (void*)difffile);
+	on_exit(fn_fclose, (void*)difffile);
 
 	// --- FINE DEI CONTROLLI --- INIZIA IL CODICE VERO ---
 	log_debug("File aperti. Inizio della ricerca differenze.");
